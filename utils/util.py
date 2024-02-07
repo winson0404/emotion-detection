@@ -6,6 +6,7 @@ import random
 from models.classification import MobileNetV3, AlexNet
 from models.CustomNet import CustomNet
 from utils.constants import MOBILENETV3_SIZE
+# from t
 import os
 from typing import Dict, Tuple, List
 from omegaconf import OmegaConf
@@ -189,9 +190,13 @@ def build_model(
         "MobileNetV3_small": MobileNetV3(
             num_classes=num_classes, model_size=MOBILENETV3_SIZE.SMALL, pretrained=pretrained, freezed=freezed
         ),
+        "MobileNetV3_small": MobileNetV3(
+            num_classes=num_classes, model_size=MOBILENETV3_SIZE.SMALL, pretrained=pretrained, freezed=freezed
+        ),
         "AlexNet": AlexNet(num_classes=num_classes, pretrained=pretrained, freezed=freezed, dropout=conf.train_params.dropout),
         "CustomNet": CustomNet(num_classes=num_classes, dropout=conf.train_params.dropout),
         "CustomNetV2": CustomNet(num_classes=num_classes, dropout=conf.train_params.dropout),
+        "EfficientNet": 
     }
 
     model = models[model_name]
