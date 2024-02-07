@@ -3,7 +3,8 @@ from torch import nn, Tensor
 import numpy as np
 import cv2
 import random
-from models.classification import MobileNetV3, AlexNet, CustomNet
+from models.classification import MobileNetV3, AlexNet
+from models.CustomNet import CustomNet
 from utils.constants import MOBILENETV3_SIZE
 import os
 from typing import Dict, Tuple, List

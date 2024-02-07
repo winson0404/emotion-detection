@@ -8,6 +8,7 @@ from omegaconf import OmegaConf
 from utils.transform import Compose
 from utils.constants import DATASET_OPERATION
 from utils.logger import Logger
+from torchvision.models.efficientnet import EfficientNet
 
 from tqdm import tqdm
 from trainer import ClassificationTrainer
@@ -21,7 +22,7 @@ logging.basicConfig(format="[LINE:%(lineno)d] %(levelname)-8s [%(asctime)s]  %(m
 if __name__ == "__main__":
     
     #initial config
-    project = "MobileNetV3"
+    project = "CustomNet"
     selection = "default.yaml" # set to None to repeat training for a conf files
     # selection = "nine_adam_20.yaml"
     conf_root = os.path.join("configs", project)
