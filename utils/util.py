@@ -196,7 +196,6 @@ def build_model(
         "AlexNet": AlexNet(num_classes=num_classes, pretrained=pretrained, freezed=freezed, dropout=conf.train_params.dropout),
         "CustomNet": CustomNet(num_classes=num_classes, dropout=conf.train_params.dropout),
         "CustomNetV2": CustomNet(num_classes=num_classes, dropout=conf.train_params.dropout),
-        "EfficientNet": 
     }
 
     model = models[model_name]
@@ -246,3 +245,13 @@ def save_checkpoint(
     }
     torch.save(checkpoint_dict, checkpoint_path)
     
+    # scale current rectangle to box
+def scale(box):
+    width = box[2] - box[0]
+    height = box[3] - box[1]
+    maximum = max(width, height)
+    dx = int((maximum - width)/2)
+    dy = int((maximum - height)/2)
+
+    bboxes = [box[0] - dx, box[1] - dy, box[2] + dx, box[3] + dy]
+    return bboxes
