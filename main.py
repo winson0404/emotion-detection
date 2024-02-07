@@ -25,18 +25,21 @@ def hand_preprocess(frame, auto=False)->np.ndarray:
     return image
 
 def emotion_preprocess(frame, auto=False)->np.ndarray:
-    image = frame.astype(np.float32)
+    # convert to gray scale
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    image = torch.from_numpy(image)
+    image = image.float()
+    image = transforms.ToPILImage()(image)
+    image = transforms.Grayscale(num_output_channels=3)(frame)
+    image = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(image)
+    image = image.numpy()
     image = cv2.resize(frame, (224, 224))
     image = image.transpose((2, 0, 1))
     image = np.expand_dims(image, axis=0)
     image = np.ascontiguousarray(image)
     # convert to tensor
-    image = torch.from_numpy(image)
-    image = image.float()
     #normalize like the training
-    image = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(image)
     # convert to numpy
-    image = image.numpy()
     return image
 
 if __name__ == "__main__":
@@ -44,6 +47,7 @@ if __name__ == "__main__":
     camera_name = "Emotion Detection"
     cap = cv2.VideoCapture(0)
     face_inf_session = ort.InferenceSession(face_model_path, providers=provider)
+    # ort.tools.python.remove_initializer_from_input(face_inf_session)
     face_outname = [i.name for i in face_inf_session.get_outputs()]
     gesture_inf_session = ort.InferenceSession(emotion_model_path, providers=provider)
     gesture_out_name = [i.name for i in gesture_inf_session.get_outputs()]
@@ -68,7 +72,7 @@ if __name__ == "__main__":
                     cropped_image = emotion_preprocess(cropped_frame)
                     out = gesture_inf_session.run(gesture_out_name, {'images': cropped_image})[0]
                     gesture = target_dict[out.argmax()]
-                    draw_image(frame, box, max(out), gesture)
+                    draw_image(frame, box, out.argmax(), gesture)
                 # if score >= threshold:
                 #     cropped_image = crop_roi_image(frame, bbox, (224, 224))
                 #     out = gesture_inf_session.run(gesture_out_name, {'images': cropped_image/255})[0]
