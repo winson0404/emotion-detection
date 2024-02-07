@@ -12,6 +12,7 @@ from typing import Dict, Tuple, List
 from omegaconf import OmegaConf
 from torchmetrics.functional import accuracy, auroc, confusion_matrix, f1_score, precision, recall
 import torch.onnx
+from models.EfficientNetB0 import EfficientNet
 
 
 def get_metrics(conf:OmegaConf, preds: Tensor, labels: Tensor) -> Dict:
@@ -196,6 +197,7 @@ def build_model(
         "AlexNet": AlexNet(num_classes=num_classes, pretrained=pretrained, freezed=freezed, dropout=conf.train_params.dropout),
         "CustomNet": CustomNet(num_classes=num_classes, dropout=conf.train_params.dropout),
         "CustomNetV2": CustomNet(num_classes=num_classes, dropout=conf.train_params.dropout),
+        "EfficientNet": EfficientNet(num_classes=num_classes, dropout=conf.train_params.dropout, pretrained=pretrained, freezed=freezed)
     }
 
     model = models[model_name]
