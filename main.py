@@ -42,7 +42,7 @@ def emotion_preprocess(frame, auto=False)->np.ndarray:
 if __name__ == "__main__":
     
     camera_name = "Emotion Detection"
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(-1)
     face_inf_session = ort.InferenceSession(face_model_path, providers=provider)
     face_outname = [i.name for i in face_inf_session.get_outputs()]
     gesture_inf_session = ort.InferenceSession(emotion_model_path, providers=provider)
