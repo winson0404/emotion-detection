@@ -5,7 +5,7 @@ from utils.transform import Compose
 from utils.constants import DATASET_OPERATION
 from utils.logger import Logger
 from utils.convert_onnx import save_onnx
-from dataset.dataset import MixedSurfaceDataset
+from dataset.dataset import EmotionDataset
 import logging
 from omegaconf import OmegaConf
 from tqdm import tqdm
@@ -59,7 +59,7 @@ class ClassificationTrainer:
         
         return optimizer
     
-    def _run_epoch(self, device:str, current_epoch:int, train_loader:MixedSurfaceDataset, lr_scheduler_warmup: torch.optim.lr_scheduler.LinearLR=None)->None:
+    def _run_epoch(self, device:str, current_epoch:int, train_loader:EmotionDataset, lr_scheduler_warmup: torch.optim.lr_scheduler.LinearLR=None)->None:
         
         # set to train mode
         self.model.train()
@@ -68,7 +68,7 @@ class ClassificationTrainer:
         criterion = torch.nn.CrossEntropyLoss()
         
         # run based on batch
-        log_loss = 0
+        train_loss = 0
         with tqdm(train_loader, unit="batch") as batch_loader:
             for i, (images, labels) in enumerate(batch_loader):
                 
@@ -90,7 +90,7 @@ class ClassificationTrainer:
                 loss = criterion(output, labels)
             
                 loss_value = loss.item()
-                log_loss = loss_value
+                train_loss += loss_value
                 
 
 
@@ -106,9 +106,10 @@ class ClassificationTrainer:
                 if lr_scheduler_warmup is not None:
                     lr_scheduler_warmup.step()
         if self.logger is not None:
-            self.logger.log("train", {"loss": loss_value, "epoch": current_epoch})
+            self.logger.log("train", {"loss": train_loss/len(train_loader), "epoch": current_epoch+1})
+        print(f"Epoch {current_epoch+1} - Loss: {train_loss/len(train_loader)}")
 
-    def _run_eval(self, device:str, current_epoch:int, validation_loader:MixedSurfaceDataset, mode:str="valid")->None:
+    def _run_eval(self, device:str, current_epoch:int, validation_loader:EmotionDataset, mode:str="valid")->None:
         f1_score = None
         
         # theres a chance that user dont wanna do validation
@@ -136,6 +137,7 @@ class ClassificationTrainer:
                     
                     if self.logger is not None:
                         self.logger.log("validation", metric)
+                
                     
         
         return f1_score
@@ -147,13 +149,13 @@ class ClassificationTrainer:
         
         transform = Compose(input_size=self.conf.dataset.image_size)
         
-        train_dataset = MixedSurfaceDataset(
+        train_dataset = EmotionDataset(
             self.conf,
             op=DATASET_OPERATION.TRAIN,
             transform=transform
         )
         
-        validation_dataset = MixedSurfaceDataset(
+        validation_dataset = EmotionDataset(
             self.conf,
             op=DATASET_OPERATION.VALIDATION,
             transform=transform
@@ -187,13 +189,13 @@ class ClassificationTrainer:
         return model
     
     def run_test(self)->None:
-        train_dataset = MixedSurfaceDataset(
+        train_dataset = EmotionDataset(
             self.conf,
             op=DATASET_OPERATION.TEST,
             transform=Compose(input_size=self.conf.dataset.image_size)
         )
         with torch.no_grad():
-                # set to non training mode:
+            # set to non training mode:
             self.model.eval()
             test_loader = DataLoader(train_dataset, batch_size=self.conf.train_params.validation_batch_size, shuffle=False)
             

@@ -26,7 +26,7 @@ class MobileNetV3(torch.nn.Module):
 				
 		self.backbone = nn.Sequential(torchvision_model.features, torchvision_model.avgpool)
 		
-		self.gesture_classifier = nn.Sequential(
+		self.emotion_classifier = nn.Sequential(
 			nn.Linear(in_features=in_features, out_features=out_features),
 			nn.Hardswish(),
 			nn.Dropout(p=0.2, inplace=True),
@@ -36,7 +36,7 @@ class MobileNetV3(torch.nn.Module):
 	def forward(self, x: Tensor)-> Tensor:
 		x = self.backbone(x)
 		x = x.view(x.size(0), -1)
-		gesture = self.gesture_classifier(x)
+		gesture = self.emotion_classifier(x)
 		
 		return gesture
 	

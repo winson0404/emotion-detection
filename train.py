@@ -12,6 +12,7 @@ from utils.logger import Logger
 from tqdm import tqdm
 from trainer import ClassificationTrainer
 import logging
+import time
 
 
 logging.basicConfig(format="[LINE:%(lineno)d] %(levelname)-8s [%(asctime)s]  %(message)s", level=logging.INFO)
@@ -20,11 +21,13 @@ logging.basicConfig(format="[LINE:%(lineno)d] %(levelname)-8s [%(asctime)s]  %(m
 if __name__ == "__main__":
     
     #initial config
-    project = "CustomNetV2"
-    selection = "default.yaml"
+    project = "MobileNetV3"
+    selection = "default.yaml" # set to None to repeat training for a conf files
     # selection = "nine_adam_20.yaml"
-    conf_root = os.path.join("configs/CustomNetV2", project)
+    conf_root = os.path.join("configs", project)
     for config in os.listdir(conf_root):
+        
+        # find selected file
         if selection is not None:
             if selection != config:
                 continue
@@ -36,7 +39,8 @@ if __name__ == "__main__":
         os.makedirs(project_path, exist_ok=True)
         
         # create experiment directory
-        experiment_path = os.path.join(project_path, conf.experiment_name)
+        # experiment_path = os.path.join(project_path, conf.experiment_name)
+        experiment_path = os.path.join(project_path, conf.experiment_name + "_" + str(int(time.time())))
         if os.path.exists(experiment_path):
             shutil.rmtree(experiment_path, ignore_errors=False, onerror=None)
         os.makedirs(experiment_path, exist_ok=False)
@@ -58,4 +62,5 @@ if __name__ == "__main__":
         trainer.save_model(experiment_path, name="model", mode="onnx")
         
         # end logger job
-        logger.finish()
+        if logger is not None:
+            logger.finish()

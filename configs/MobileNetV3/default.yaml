@@ -1,4 +1,4 @@
-project_name: MobileNetV3
+project_name: MobileNetV3_small
 experiment_name: default
 dataset:
   dataset_path: data/
@@ -22,18 +22,18 @@ model:
   full_frame: False
 optimizer:
   optimizer: sgd # adam, sgd, rmsprop
-  lr: 0.005
+  lr: 0.01
   momentum: 0.9
   weight_decay: 0.0005
 scheduler:
   start_factor: 0.001
 train_params:
-  epochs: 20
+  epochs: 50
   num_workers: 16
   train_batch_size: 32
   validation_batch_size: 32
   early_stopping: 10
-  dropout: 0.5
+  dropout: 0.1
 metric_params:
   metrics: ['accuracy', 'f1_score', 'precision', 'recall']
   average: 'weighted'
