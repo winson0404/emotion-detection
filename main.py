@@ -27,25 +27,33 @@ def hand_preprocess(frame, auto=False)->np.ndarray:
 def emotion_preprocess(frame, auto=False)->np.ndarray:
     # convert to gray scale
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    image = torch.from_numpy(image)
-    image = image.float()
-    image = transforms.ToPILImage()(image)
-    image = transforms.Grayscale(num_output_channels=3)(frame)
-    image = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(image)
-    image = image.numpy()
+    # image = torch.from_numpy(image)
     image = cv2.resize(frame, (224, 224))
     image = image.transpose((2, 0, 1))
     image = np.expand_dims(image, axis=0)
     image = np.ascontiguousarray(image)
-    # convert to tensor
-    #normalize like the training
+    image = image.astype(np.float32)
+    # convefrt to tensor
+    # normalize
     # convert to numpy
     return image
+
+def compute_softmax(x):
+    
+    # image = torch.from_numpy(image)
+    # image = image.float()
+    # image = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(image)
+    # image = image.numpy()
+    # convert to tensor
+    #normalize like the training
+    # convert to numpy    
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum()
 
 if __name__ == "__main__":
     
     camera_name = "Emotion Detection"
-    cap = cv2.VideoCapture(-1)
+    cap = cv2.VideoCapture(0)
     face_inf_session = ort.InferenceSession(face_model_path, providers=provider)
     # ort.tools.python.remove_initializer_from_input(face_inf_session)
     face_outname = [i.name for i in face_inf_session.get_outputs()]
@@ -71,8 +79,12 @@ if __name__ == "__main__":
                 if cropped_frame is not None:
                     cropped_image = emotion_preprocess(cropped_frame)
                     out = gesture_inf_session.run(gesture_out_name, {'images': cropped_image})[0]
-                    gesture = target_dict[out.argmax()]
-                    draw_image(frame, box, out.argmax(), gesture)
+                    emotion = target_dict[out.argmax()]
+                    #apply softmax to out
+                    out = compute_softmax(out[0])
+                    print(out)
+                    draw_image(frame, box, "", emotion)
+                    cropped_frame= None
                 # if score >= threshold:
                 #     cropped_image = crop_roi_image(frame, bbox, (224, 224))
                 #     out = gesture_inf_session.run(gesture_out_name, {'images': cropped_image/255})[0]

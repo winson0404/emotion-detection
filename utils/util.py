@@ -3,8 +3,10 @@ from torch import nn, Tensor
 import numpy as np
 import cv2
 import random
-from models.classification import MobileNetV3, AlexNet
+from models.AlexNet import AlexNet
+from models.MobileNet import MobileNetV3
 from models.CustomNet import CustomNet
+from models.EfficientNetB0 import EfficientNet
 from utils.constants import MOBILENETV3_SIZE
 # from t
 import os
@@ -12,7 +14,6 @@ from typing import Dict, Tuple, List
 from omegaconf import OmegaConf
 from torchmetrics.functional import accuracy, auroc, confusion_matrix, f1_score, precision, recall
 import torch.onnx
-from models.EfficientNetB0 import EfficientNet
 
 
 def get_metrics(conf:OmegaConf, preds: Tensor, labels: Tensor) -> Dict:
