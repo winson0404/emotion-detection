@@ -9,10 +9,10 @@ from omegaconf import OmegaConf
 import torchvision.transforms as transforms
 
 face_model_path = "data/model_weights/version-RFB-640.onnx"
-emotion_model_path = r"output\MobileNetV3_small\default\model.onnx"
+emotion_model_path = r"output\Emotion_CustomNet\default\best_model.onnx"
 provider = ['CPUExecutionProvider']
 threshold = 0.5
-conf = OmegaConf.load("configs/MobileNetV3/default.yaml")
+conf = OmegaConf.load("configs/CustomNet/default.yaml")
 target_dict = {i: label for i, label in enumerate(conf.dataset.targets)}
 
 def hand_preprocess(frame, auto=False)->np.ndarray:
@@ -28,7 +28,7 @@ def emotion_preprocess(frame, auto=False)->np.ndarray:
     # convert to gray scale
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     # image = torch.from_numpy(image)
-    image = cv2.resize(frame, (224, 224))
+    image = cv2.resize(frame, (conf.dataset.image_size[0], conf.dataset.image_size[1]))
     image = image.transpose((2, 0, 1))
     image = np.expand_dims(image, axis=0)
     image = np.ascontiguousarray(image)
@@ -57,8 +57,8 @@ if __name__ == "__main__":
     face_inf_session = ort.InferenceSession(face_model_path, providers=provider)
     # ort.tools.python.remove_initializer_from_input(face_inf_session)
     face_outname = [i.name for i in face_inf_session.get_outputs()]
-    gesture_inf_session = ort.InferenceSession(emotion_model_path, providers=provider)
-    gesture_out_name = [i.name for i in gesture_inf_session.get_outputs()]
+    emotion_inf_session = ort.InferenceSession(emotion_model_path, providers=provider)
+    emotion_out_name = [i.name for i in emotion_inf_session.get_outputs()]
     got_roi = False
     cropped_frame = None
     while cap.isOpened():
@@ -78,18 +78,18 @@ if __name__ == "__main__":
                     got_roi = True
                 if cropped_frame is not None:
                     cropped_image = emotion_preprocess(cropped_frame)
-                    out = gesture_inf_session.run(gesture_out_name, {'images': cropped_image})[0]
+                    out = emotion_inf_session.run(emotion_out_name, {'images': cropped_image})[0]
                     emotion = target_dict[out.argmax()]
                     #apply softmax to out
                     out = compute_softmax(out[0])
-                    print(out)
+                    # print(out)
                     draw_image(frame, box, "", emotion)
                     cropped_frame= None
                 # if score >= threshold:
                 #     cropped_image = crop_roi_image(frame, bbox, (224, 224))
-                #     out = gesture_inf_session.run(gesture_out_name, {'images': cropped_image/255})[0]
-                #     gesture = target_dict[out.argmax()]
-                #     draw_image(frame, bbox, score, gesture)
+                #     out = emotion_inf_session.run(emotion_out_name, {'images': cropped_image/255})[0]
+                #     emotion = target_dict[out.argmax()]
+                #     draw_image(frame, bbox, score, emotion)
                 cv2.imshow(camera_name, frame)
         except Exception as e:
             print(e)

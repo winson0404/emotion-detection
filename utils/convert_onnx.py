@@ -5,7 +5,7 @@ from typing import Tuple
 from omegaconf import OmegaConf
 from utils.constants import MOBILENETV3_SIZE
 from utils.transform import Compose
-from models.classification import MobileNetV3
+from models.MobileNet import MobileNetV3
 
 def save_onnx(model: nn.Module, output_dir: str, name: str, input_shape: Tuple[int, int, int] = (3, 224, 224)) -> None:
     """

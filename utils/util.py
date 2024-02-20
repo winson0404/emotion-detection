@@ -121,7 +121,7 @@ def crop_roi_image(img, bbox, target_size):
         resized_width, resized_height = int(cropped_width * scale), int(cropped_height * scale)
         resized_image = cv2.resize(crop_image, (resized_width, resized_height))
         
-        # pad the cropped gesture image to the input size
+        # pad the cropped emotion image to the input size
         padded_image = np.zeros((target_height, target_width, 3), dtype=np.uint8)
         padded_image[:] = (0, 0, 0)
         

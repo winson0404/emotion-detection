@@ -19,7 +19,7 @@ class AlexNet(torch.nn.Module):
 		
 		self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
 		
-		self.gesture_classifier = nn.Sequential(
+		self.emotion_classifier = nn.Sequential(
 			nn.Dropout(p=dropout),
 			nn.Linear(256 * 6 * 6, 4096),
 			nn.ReLU(inplace=True),
@@ -35,6 +35,6 @@ class AlexNet(torch.nn.Module):
 		x = self.backbone(x)
 		x = self.avgpool(x)
 		x = torch.flatten(x, 1)
-		gesture = self.gesture_classifier(x)
+		emotion = self.emotion_classifier(x)
 		
-		return gesture
+		return emotion

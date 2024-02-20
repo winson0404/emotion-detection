@@ -37,7 +37,7 @@ class MobileNetV3(torch.nn.Module):
 	def forward(self, x: Tensor)-> Tensor:
 		x = self.backbone(x)
 		x = x.view(x.size(0), -1)
-		gesture = self.emotion_classifier(x)
+		emotion = self.emotion_classifier(x)
 		
-		return gesture
+		return emotion
 	
